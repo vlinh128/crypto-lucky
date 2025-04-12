@@ -29,6 +29,7 @@ class DogecoinFinder(BaseFinder):
                 'parser': self._parse_blockchair_response
             }
         ]
+        self.current_api_index = 0  # Index của API đang sử dụng
 
     def _search_worker(self):
         """Main search worker"""
@@ -93,7 +94,9 @@ class DogecoinFinder(BaseFinder):
 
     def check_balance(self, address: str):
         """Check DOGE balance using multiple APIs"""
-        for api in self.api_endpoints:
+        # Thử tất cả các API cho đến khi tìm được balance
+        for _ in range(len(self.api_endpoints)):
+            api = self.api_endpoints[self.current_api_index]
             try:
                 url = api['url'].format(address=address)
                 response = requests.get(url, timeout=10)
@@ -102,9 +105,34 @@ class DogecoinFinder(BaseFinder):
                     balance = api['parser'](response)
                     if balance is not None:
                         return balance, api['name']
+                elif response.status_code == 429:  # Too Many Requests
+                    logging.warning(f"Rate limit hit for {api['name']}, switching to next API")
+                    # Chuyển sang API tiếp theo
+                    self.current_api_index = (self.current_api_index + 1) % len(self.api_endpoints)
+                    continue
             except Exception as e:
                 logging.error(f"Error checking DOGE balance with {api['name']}: {str(e)}")
+                # Chuyển sang API tiếp theo
+                self.current_api_index = (self.current_api_index + 1) % len(self.api_endpoints)
                 continue
+        
+        # Nếu tất cả API đều thất bại, đợi 1 phút và thử lại với API đầu tiên
+        logging.warning("All APIs failed. Waiting for 1 minute before retrying...")
+        time.sleep(60)
+        self.current_api_index = 0
+        
+        # Thử lại với API đầu tiên
+        try:
+            api = self.api_endpoints[self.current_api_index]
+            url = api['url'].format(address=address)
+            response = requests.get(url, timeout=10)
+            
+            if response.status_code == 200:
+                balance = api['parser'](response)
+                if balance is not None:
+                    return balance, api['name']
+        except Exception as e:
+            logging.error(f"Error checking DOGE balance after waiting: {str(e)}")
         
         return 0, "unknown"
         
@@ -146,6 +174,11 @@ class DogecoinFinder(BaseFinder):
                 f"https://api.blockchair.com/dogecoin/dashboards/address/{address}",
                 timeout=30  # Tăng timeout lên 30 giây
             )
+            
+            if response.status_code == 429:  # Too Many Requests
+                logging.warning("Rate limit hit for Blockchair")
+                return 0.0
+                
             response.raise_for_status()
             data = response.json()
             

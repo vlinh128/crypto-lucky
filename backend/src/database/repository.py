@@ -118,7 +118,7 @@ class WalletRepository:
             logging.error(f"Lỗi khi lưu ví: {str(e)}")
             return False
 
-    def get_wallets_paginated(self, limit: int = 50) -> List[Wallet]:
+    def get_wallets(self, limit: int = 50) -> List[Wallet]:
         try:            
             # Lấy danh sách ví, sắp xếp theo thời gian tạo giảm dần
             wallets_cursor = self.collection.find({}).sort("created_at", -1).limit(limit)

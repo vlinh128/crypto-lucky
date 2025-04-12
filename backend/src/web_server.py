@@ -55,11 +55,11 @@ def send_sse_message(event_type: str, data: dict):
 def handle_wallet_found(wallet: Wallet, stats: Stats):
     """Callback khi tìm thấy ví mới"""
     # Gửi thông báo qua SSE
-    send_sse_message('wallet_found', wallet.to_dict())
+    send_sse_message('wallet_found', wallet.to_dict_str())
     
     # Gửi stats mới
     if stats:
-        send_sse_message('stats_update', stats.to_dict())
+        send_sse_message('stats_update', stats.to_dict_str())
 
 # Khởi tạo và start tất cả finders
 finders = [
@@ -75,8 +75,6 @@ for finder in finders:
 # Models cho Swagger
 wallet_model = api.model('Wallet', {
     'address': fields.String(description='Địa chỉ ví'),
-    'private_key_hex': fields.String(description='Private key dạng hex'),
-    'wif_key': fields.String(description='WIF key'),
     'balance': fields.Float(description='Số dư'),
     'strategy': fields.String(description='Chiến lược đã sử dụng'),
     'api_source': fields.String(description='API được sử dụng để kiểm tra số dư'),
@@ -89,8 +87,6 @@ wallet_list_model = api.model('WalletList', {
     'success': fields.Boolean(description='Trạng thái response'),
     'data': fields.Nested(api.model('WalletListData', {
         'wallets': fields.List(fields.Nested(wallet_model), description='Danh sách ví'),
-        'total': fields.Integer(description='Tổng số ví có số dư'),
-        'next_cursor': fields.String(description='Cursor cho lần load tiếp theo')
     }))
 })
 
@@ -122,7 +118,7 @@ class StatsResource(Resource):
             for finder in finders:
                 stats = stats_repo.get_latest(finder.coin_type)
                 if stats:
-                    all_stats[finder.coin_type] = stats.to_dict()
+                    all_stats[finder.coin_type] = stats.to_dict_str()
             
             return {
                 'success': True,
@@ -147,7 +143,7 @@ class WalletList(Resource):
             limit = min(request.args.get('limit', 20, type=int), 50)  # Giới hạn tối đa 50
             
             # Get wallets with pagination
-            wallets = wallet_repo.get_wallets_paginated(limit=limit)
+            wallets = wallet_repo.get_wallets(limit=limit)
             
             # Return response
             return {

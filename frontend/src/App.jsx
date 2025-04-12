@@ -1,149 +1,101 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
-const API_URL =  'http://localhost:8888';
+const API_URL = 'http://localhost:8888';
+
+// Token definitions
+const TOKENS = {
+  BTC: { name: 'Bitcoin', symbol: 'BTC', decimals: 8 },
+  ETH: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+  DOGE: { name: 'Dogecoin', symbol: 'DOGE', decimals: 8 }
+};
 
 function App() {
+  // Stats state for each token type
   const [stats, setStats] = useState({
-    total_wallets: 0,
-    total_balance: 0,
-    max_balance: 0,
-    min_balance: 0,
-    is_searching: false
+    BTC: { total_wallets: 0, total_balance: 0 },
+    ETH: { total_wallets: 0, total_balance: 0 },
+    DOGE: { total_wallets: 0, total_balance: 0 }
   });
+  
+  // State for wallet list (all token types)
   const [wallets, setWallets] = useState([]);
+  
   const [error, setError] = useState(null);
   const initialDataLoaded = useRef(false);
 
-  useEffect(() => {
-    if (!initialDataLoaded.current) {
-      fetchInitialData();
-      initialDataLoaded.current = true;
-    }
-  }, []);
-
-  const fetchInitialData = async () => {
+  // Fetch data from API
+  const fetchData = async () => {
     try {
       const [statsResponse, walletsResponse] = await Promise.all([
-        fetch('http://localhost:8888/api/stats'),
-        fetch('http://localhost:8888/api/wallets')
+        fetch(`${API_URL}/api/stats`),
+        fetch(`${API_URL}/api/wallets`)
       ]);
 
       const statsJson = await statsResponse.json();
       const walletsJson = await walletsResponse.json();
 
       if (statsJson.data) {
-        setStats(prev => ({
-          ...prev,
-          total_wallets: statsJson.data.total_wallets || 0,
-          total_balance: statsJson.data.total_balance || 0,
-          max_balance: statsJson.data.max_balance || 0,
-          min_balance: statsJson.data.min_balance || 0,
-          is_searching: statsJson.data.is_searching || false
-        }));
+        // Update stats for each token type
+        const newStats = { ...stats };
+        Object.entries(statsJson.data).forEach(([coinType, data]) => {
+          newStats[coinType] = {
+            total_wallets: data.total_wallets || 0,
+            total_balance: data.total_balance || 0
+          };
+        });
+        setStats(newStats);
       }
 
-      if (walletsJson.wallets) {
-        setWallets(walletsJson.wallets);
+      if (walletsJson.success && walletsJson.data && walletsJson.data.wallets) {
+        // Save all wallets to array
+        setWallets(walletsJson.data.wallets);
       }
     } catch (error) {
-      console.error('Error fetching initial data:', error);
-      setError('Failed to load initial data');
+      console.error('Error fetching data:', error);
+      setError('Failed to load data');
     }
   };
 
-  // Setup SSE connection for real-time updates
+  // Initial data fetch
   useEffect(() => {
-    let eventSource = null;
-    let reconnectTimeout = null;
-    
-    const setupSSE = () => {
-      console.log('Setting up SSE connection...');
-      
-      if (eventSource) {
-        eventSource.close();
-      }
-      
-      eventSource = new EventSource(`${API_URL}/api/stream`);
-
-      // Handle wallet updates
-      eventSource.addEventListener('wallet_found', (event) => {
-        console.log('Received wallet_found event:', event.data);
-        try {
-          const newWallet = JSON.parse(event.data);
-          setWallets(prevWallets => {
-            const filteredWallets = prevWallets.filter(w => w.address !== newWallet.address);
-            return [newWallet, ...filteredWallets];
-          });
-        } catch (error) {
-          console.error('Error parsing wallet update:', error);
-        }
-      });
-
-      // Handle stats updates
-      eventSource.addEventListener('stats_update', (event) => {
-        console.log('Received stats_update event:', event.data);
-        try {
-          const statsData = JSON.parse(event.data);
-          setStats(prev => ({
-            ...prev,
-            total_wallets: statsData.total_wallets || prev.total_wallets,
-            total_balance: statsData.total_balance || prev.total_balance,
-            max_balance: statsData.max_balance || prev.max_balance,
-            min_balance: statsData.min_balance || prev.min_balance,
-            is_searching: statsData.is_searching !== undefined ? statsData.is_searching : prev.is_searching
-          }));
-        } catch (error) {
-          console.error('Error parsing stats update:', error);
-        }
-      });
-
-      // Handle search status updates
-      eventSource.addEventListener('search_status', (event) => {
-        console.log('Received search_status event:', event.data);
-        try {
-          const statusData = JSON.parse(event.data);
-          setStats(prev => ({
-            ...prev,
-            is_searching: statusData.is_searching
-          }));
-        } catch (error) {
-          console.error('Error parsing search status:', error);
-        }
-      });
-
-      // Handle connection open/error
-      eventSource.onopen = () => {
-        console.log('SSE connection opened');
-        setError(null);
-      };
-
-      eventSource.onerror = (error) => {
-        console.error('SSE connection error:', error);
-        eventSource.close();
-        
-        if (reconnectTimeout) {
-          clearTimeout(reconnectTimeout);
-        }
-        
-        reconnectTimeout = setTimeout(() => {
-          setError('Lost connection to server. Reconnecting...');
-          setupSSE();
-        }, 5000);
-      };
-    };
-    
-    setupSSE();
-    
-    return () => {
-      if (eventSource) {
-        eventSource.close();
-      }
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-      }
-    };
+    if (!initialDataLoaded.current) {
+      fetchData();
+      initialDataLoaded.current = true;
+    }
   }, []);
+
+  // Polling every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Component to display stats for a token type
+  const TokenStats = ({ coinType }) => {
+    const tokenInfo = TOKENS[coinType];
+    const tokenStats = stats[coinType];
+    
+    return (
+      <div className="col-md-4 mb-4">
+        <div className="card stats-card">
+          <div className="card-header">
+            <h5 className="card-title mb-0">{tokenInfo.name} ({tokenInfo.symbol})</h5>
+          </div>
+          <div className="card-body">
+            <div className="stats-row">
+              <div className="stats-label">Total Wallets</div>
+              <div className="stats-value">{tokenStats.total_wallets}</div>
+            </div>
+            <div className="stats-row">
+              <div className="stats-label">Total Balance</div>
+              <div className="stats-value">{Number(tokenStats.total_balance).toFixed(2)} {tokenInfo.symbol}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="container-fluid">
@@ -154,51 +106,60 @@ function App() {
           {error}
         </div>
       )}
+      
+      {/* Stats for all token types */}
       <div className="row g-4 mb-4">
-        <div className="col-md-6">
-          <div className="card stats-card">
-            <div className="card-body">
-              <div className="stats-label">Tổng số ví</div>
-              <div className="stats-value">{stats.total_wallets}</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6">
-          <div className="card stats-card">
-            <div className="card-body">
-              <div className="stats-label">Tổng số dư</div>
-              <div className="stats-value">{stats.total_balance.toFixed(8)} BTC</div>
-            </div>
-          </div>
-        </div>
+        {Object.keys(TOKENS).map(coinType => (
+          <TokenStats key={coinType} coinType={coinType} />
+        ))}
       </div>
 
+      {/* Combined table for all wallets */}
       <div className="card">
+        <div className="card-header">
+          <h5 className="card-title mb-0">Found Wallets</h5>
+        </div>
         <div className="card-body">
-          <h5 className="card-title">Danh sách ví đã tìm thấy</h5>
           <div className="table-container">
             <table className="table table-striped table-hover">
               <thead>
                 <tr>
-                  <th>Địa chỉ</th>
-                  <th>Số dư (BTC)</th>
-                  <th>Chiến lược</th>
+                  <th>Type</th>
+                  <th>Address</th>
+                  <th>Balance</th>
+                  <th>Strategy</th>
                   <th>API Source</th>
-                  <th>Thời gian kiểm tra</th>
+                  <th>Check Time</th>
                 </tr>
               </thead>
               <tbody>
-                {wallets.map((wallet) => (
-                  <tr key={wallet.address}>
-                    <td className="address-column text-monospace">{wallet.address}</td>
-                    <td className="balance-column text-monospace">{wallet.balance.toFixed(8)}</td>
-                    <td className="strategy-column">{wallet.strategy}</td>
-                    <td className="api-source-column">{wallet.api_source}</td>
-                    <td className="timestamp-column">
-                      {new Date(wallet.created_at).toLocaleString('vi-VN')}
-                    </td>
+                {wallets.map((wallet) => {
+                  // Default to BTC if coin_type is not available
+                  const tokenInfo = TOKENS[wallet.coin_type] || { symbol: wallet.coin_type, decimals: 8 };
+                  return (
+                    <tr key={wallet.address}>
+                      <td>
+                        <span className={`token-badge ${wallet.coin_type.toLowerCase()}`}>
+                          {tokenInfo.symbol}
+                        </span>
+                      </td>
+                      <td className="address-column text-monospace">{wallet.address}</td>
+                      <td className="balance-column text-monospace">
+                        {Number(wallet.balance).toFixed(2)} {tokenInfo.symbol}
+                      </td>
+                      <td className="strategy-column">{wallet.strategy}</td>
+                      <td className="api-source-column">{wallet.api_source}</td>
+                      <td className="timestamp-column">
+                        {new Date(wallet.created_at).toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {wallets.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="text-center">No wallets found yet</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
