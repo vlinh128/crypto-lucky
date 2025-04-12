@@ -11,6 +11,13 @@ ecdsa==0.18.0
 base58==2.1.1
 requests==2.31.0
 
+# Ethereum dependencies
+web3==6.15.1
+eth-account==0.11.0
+
+# Dogecoin dependencies
+coincurve==19.0.1
+
 # Database
 pymongo[srv]==4.6.2
 pandas==2.2.1
