@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+__pycache__/
+venv/
+ENV/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build
+/frontend/dist/
+/frontend/build/
+/backend/build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local MongoDB
+data/
+mongodb/ 

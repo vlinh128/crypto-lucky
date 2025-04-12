@@ -1,0 +1,31 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.display-4 {
+  font-size: 2.5rem;
+  font-weight: 300;
+}
+
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2rem;
+  }
+} 
