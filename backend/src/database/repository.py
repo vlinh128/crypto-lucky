@@ -118,15 +118,14 @@ class WalletRepository:
             logging.error(f"Lỗi khi lưu ví: {str(e)}")
             return False
 
-    def get_wallets_paginated(self, limit: int = 50) -> List[Wallet]:
+    def get_wallets(self, limit: int = 50) -> List[Wallet]:
         try:            
-            # Lấy danh sách ví, chỉ sắp xếp theo thời gian tạo giảm dần
-            wallets = list(self.collection.find({})
-                         .sort("created_at", -1)
-                         .limit(limit))
+            # Lấy danh sách ví, sắp xếp theo thời gian tạo giảm dần
+            wallets_cursor = self.collection.find({}).sort("created_at", -1).limit(limit)
+            wallets_list = list(wallets_cursor)
             
             # Convert MongoDB documents to Wallet objects
-            return [
+            wallets = [
                 Wallet(
                     address=w['address'],
                     private_key_hex=w['private_key_hex'],
@@ -137,8 +136,10 @@ class WalletRepository:
                     coin_type=w.get('coin_type', 'BTC'),
                     created_at=w['created_at'],
                     updated_at=w['updated_at']
-                ) for w in wallets
+                ) for w in wallets_list
             ]
+            
+            return wallets
             
         except Exception as e:
             logging.error(f"Lỗi khi lấy danh sách ví: {str(e)}")

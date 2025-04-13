@@ -1,262 +1,431 @@
-/* General styles */
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+  --neon-green: #00ff00;
+  --neon-green-dim: rgba(0, 255, 0, 0.7);
+  --neon-green-glow: 0 0 10px rgba(0, 255, 0, 0.5);
+  --bg-dark: #000000;
+  --glass-border: rgba(0, 255, 0, 0.3);
+  --glass-bg: rgba(0, 20, 0, 0.2);
+  --border-sharp: 4px;
+}
+
+/* Base */
 body {
-  background-color: #1a1a1a;
   margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  color: #fff;
-}
-
-.container-fluid {
   padding: 20px;
-  height: 100%;
-  max-width: 1800px;
-  margin: 0 auto;
+  background: var(--bg-dark);
+  color: var(--neon-green);
+  font-family: 'Share Tech Mono', monospace;
+  background-image: 
+    linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(0, 255, 0, 0.05) .5px, transparent .5px),
+    linear-gradient(90deg, rgba(0, 255, 0, 0.05) .5px, transparent .5px);
+  background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+  background-position: center center;
+  min-height: 100vh;
 }
 
-h1 {
-  color: #ff4d4d;
-  font-weight: bold;
-}
-
-/* Card styles */
+/* Card with Grid Overlay */
 .card {
-  background-color: #2d2d2d;
-  border: 1px solid #ff4d4d;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(255, 77, 77, 0.2);
-  margin-bottom: 20px;
-  height: 100%;
+  background: transparent !important;
+  border: 2px solid var(--glass-border);
+  border-radius: var(--border-sharp);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  position: relative;
 }
 
-.card-body {
-  padding: 1.25rem;
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(0, 255, 0, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 0, 0.07) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 1;
 }
 
+.card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Main Title */
+h1 {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 20px 0;
+  color: var(--neon-green);
+  text-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.8),
+    0 0 20px rgba(0, 255, 0, 0.3),
+    0 0 30px rgba(0, 255, 0, 0.2);
+  font-size: 32px;
+}
+
+/* Card Title */
 .card-title {
-  color: #ff4d4d;
-  font-weight: bold;
-  margin-bottom: 15px;
+  color: var(--neon-green);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 20px;
+  margin: 0;
+  padding: 15px;
+  text-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.8),
+    0 0 20px rgba(0, 255, 0, 0.3),
+    0 0 30px rgba(0, 255, 0, 0.2);
 }
 
-/* Stats cards */
-.stats-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Crypto Card Titles */
+.stats-card h2 {
+  color: var(--neon-green);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+  padding: 15px;
+  font-size: 20px;
+  text-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.8),
+    0 0 20px rgba(0, 255, 0, 0.3);
+  border-bottom: 1px solid var(--glass-border);
 }
 
-.stats-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(255, 77, 77, 0.3);
+/* Found Wallets Title */
+.found-wallets h2 {
+  color: var(--neon-green);
+  font-size: 24px;
+  margin: 30px 0 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.8),
+    0 0 20px rgba(0, 255, 0, 0.3),
+    0 0 30px rgba(0, 255, 0, 0.2);
 }
 
-.stats-label {
-  color: #ff4d4d;
-  font-size: 0.9rem;
-  margin-bottom: 5px;
-}
-
+/* Stats Values */
 .stats-value {
-  color: #fff;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-/* Table styles */
-.table-container {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  margin-bottom: 0;
-}
-
-.table thead th {
-  background-color: #ff4d4d;
-  color: #fff;
-  border-bottom: 2px solid #ff4d4d;
-  padding: 12px 15px;
-}
-
-.table tbody td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #444;
-  color: #fff;
-  background-color: #2d2d2d;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-  background-color: #333;
-}
-
-.table-striped tbody tr:nth-of-type(even) {
-  background-color: #2d2d2d;
-}
-
-.table-hover tbody tr:hover {
-  background-color: #444;
-}
-
-.text-monospace {
-  font-family: monospace;
-  color: #fff;
-}
-
-/* Thêm style cho các cột cụ thể */
-.table .address-column {
-  color: #ff4d4d;
-}
-
-.table .balance-column {
-  color: #00ff00;
-  font-weight: bold;
-}
-
-.table .strategy-column {
-  color: #ffff00;
-}
-
-.table .api-source-column {
-  color: #00ffff;
-}
-
-.table .timestamp-column {
-  color: #ff00ff;
-}
-
-/* Button styles */
-.btn {
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn-success {
-  background-color: #ff4d4d;
-  border-color: #ff4d4d;
-  color: #fff;
-}
-
-.btn-success:hover {
-  background-color: #ff3333;
-  border-color: #ff3333;
-}
-
-.btn-danger {
-  background-color: transparent;
-  border-color: #ff4d4d;
-  color: #ff4d4d;
-}
-
-.btn-danger:hover {
-  background-color: #ff4d4d;
-  color: #fff;
-}
-
-.btn-primary {
-  background-color: transparent;
-  border-color: #ff4d4d;
-  color: #ff4d4d;
-}
-
-.btn-primary:hover {
-  background-color: #ff4d4d;
-  color: #fff;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Loading spinner */
-.spinner-border {
-  color: #ff4d4d;
-}
-
-/* Status indicator */
-.status-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #dc3545;
-  margin-right: 8px;
-  transition: background-color 0.3s ease;
-}
-
-.status-indicator.connected {
-  background-color: #28a745;
-}
-
-.status-active {
-  background-color: rgba(255, 77, 77, 0.2);
-  color: #ff4d4d;
-}
-
-.status-inactive {
-  background-color: rgba(128, 128, 128, 0.2);
-  color: #aaa;
-}
-
-/* Connection status */
-.connection-status {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  color: var(--neon-green);
+  text-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.8),
+    0 0 20px rgba(0, 255, 0, 0.3);
   font-weight: 500;
 }
 
-.connection-status.connected {
-  background-color: rgba(0, 255, 0, 0.2);
-  color: #0f0;
+/* Stats Labels */
+.stats-label {
+  color: var(--neon-green);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
 }
 
-.connection-status.connecting {
-  background-color: rgba(255, 255, 0, 0.2);
-  color: #ff0;
-}
-
-.connection-status.disconnected {
-  background-color: rgba(255, 0, 0, 0.2);
-  color: #f00;
-}
-
-/* Alert styles */
-.alert {
-  border-radius: 4px;
-  padding: 12px 15px;
+/* Stats Section */
+.stats-card {
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--border-sharp);
+  overflow: hidden;
   margin-bottom: 20px;
+  backdrop-filter: blur(8px);
 }
 
-.alert-danger {
-  background-color: rgba(255, 0, 0, 0.2);
-  border: 1px solid #f00;
-  color: #f00;
+.stats-row {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--glass-border);
 }
 
-/* Responsive adjustments */
+.stats-row:last-child {
+  border: none;
+}
+
+/* Table Container with Grid */
+.table-container {
+  position: relative;
+  background: transparent;
+  border: 2px solid var(--glass-border);
+  border-radius: var(--border-sharp);
+  overflow: auto;
+  max-height: 70vh;
+  backdrop-filter: blur(8px);
+}
+
+.table-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  background-color: transparent !important;
+}
+
+.table * {
+  background-color: transparent !important;
+}
+
+.table thead {
+  background-color: transparent !important;
+}
+
+.table tbody {
+  background-color: transparent !important;
+}
+
+.table th {
+  background: rgba(0, 20, 0, 0.4) !important;
+  color: var(--neon-green);
+  text-transform: uppercase;
+  padding: 15px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--glass-border);
+}
+
+.table th:first-child {
+  padding-left: 20px;
+}
+
+.table th.balance-column,
+.table th:nth-child(3) {
+  text-align: right;
+  padding-right: 20px;
+}
+
+.table th.strategy-column,
+.table th:nth-child(4),
+.table th.api-source-column,
+.table th:nth-child(5) {
+  text-align: center;
+}
+
+.table th.timestamp-column,
+.table th:last-child {
+  text-align: right;
+  padding-right: 20px;
+}
+
+.table tr {
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--glass-border);
+  transition: all 0.2s ease;
+}
+
+.table tr:nth-child(even),
+.table tr:nth-child(odd) {
+  background-color: transparent !important;
+}
+
+.table td {
+  background-color: transparent !important;
+  padding: 12px 15px;
+  color: var(--neon-green-dim);
+  border: none;
+}
+
+.table td:first-child {
+  padding-left: 20px;
+}
+
+.table td.balance-column,
+.table td:nth-child(3) {
+  text-align: right;
+  padding-right: 20px;
+}
+
+.table td.strategy-column,
+.table td:nth-child(4),
+.table td.api-source-column,
+.table td:nth-child(5) {
+  text-align: center;
+}
+
+.table td.timestamp-column,
+.table td:last-child {
+  text-align: right;
+  padding-right: 20px;
+}
+
+.table tr:hover {
+  background: rgba(0, 255, 0, 0.05) !important;
+}
+
+.table tr:hover td {
+  color: var(--neon-green);
+  background: transparent !important;
+}
+
+/* Found Wallets Section */
+.found-wallets {
+  background: transparent !important;
+}
+
+.found-wallets * {
+  background-color: transparent !important;
+}
+
+/* Token Badge */
+.token-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 24px;
+  border-radius: var(--border-sharp);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: transparent;
+  backdrop-filter: blur(4px);
+  border: 2px solid;
+}
+
+.token-badge.btc {
+  color: #f7931a;
+  border-color: #f7931a;
+}
+
+.token-badge.eth {
+  color: #627eea;
+  border-color: #627eea;
+}
+
+.token-badge.doge {
+  color: #c3a634;
+  border-color: #c3a634;
+}
+
+/* Table Columns */
+.address-column {
+  max-width: 380px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+.balance-column {
+  text-align: right;
+  color: var(--neon-green);
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.strategy-column {
+  text-align: center;
+  min-width: 100px;
+}
+
+.api-source-column {
+  text-align: center;
+  min-width: 80px;
+}
+
+.timestamp-column {
+  text-align: right;
+  font-size: 0.9em;
+  min-width: 150px;
+  opacity: 0.8;
+}
+
+/* Scrollbar */
+.table-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 0, 0.2);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .stats-value {
-    font-size: 1.2rem;
+  body {
+    padding: 10px;
   }
-  
-  .table thead th, .table tbody td {
-    padding: 8px 10px;
-    font-size: 0.9rem;
+
+  .table {
+    font-size: 13px;
   }
-  
-  .btn {
-    padding: 6px 12px;
-    font-size: 0.9rem;
+
+  .table th,
+  .table td {
+    padding: 10px;
   }
-  
-  h1 {
-    font-size: 1.5rem;
+
+  .address-column {
+    max-width: 150px;
   }
-  
-  .card-title {
-    font-size: 1.1rem;
+
+  .balance-column {
+    min-width: 100px;
   }
-} 
+
+  .strategy-column,
+  .api-source-column {
+    min-width: 70px;
+  }
+
+  .timestamp-column {
+    min-width: 120px;
+  }
+}
+
+/* Margin Utilities */
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+/* Stats Card Titles */
+.stats-card .card-title {
+  border-bottom: 2px solid var(--glass-border);
+  background: rgba(0, 20, 0, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+/* Found Wallets Title */
+.found-wallets .card-title {
+  font-size: 24px;
+  margin: 30px 0 20px;
+}
