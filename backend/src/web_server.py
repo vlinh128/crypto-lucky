@@ -11,15 +11,27 @@ from finders.dogecoin_finder import DogecoinFinder
 import logging
 import json
 from queue import Queue
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Cấu hình logging
+log_level = os.getenv("LOG_LEVEL", "INFO")
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, log_level),
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Khởi tạo API với Swagger
 api = Api(app, version='1.0',
@@ -109,6 +121,7 @@ def stream():
     )
 
 @stats_ns.route('')
+@stats_ns.route('/')
 class StatsResource(Resource):
     @stats_ns.doc('get_stats')
     def get(self):
@@ -160,4 +173,9 @@ class WalletList(Resource):
             }, 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8888) 
+    # Get host and port from environment variables
+    host = os.getenv("API_HOST", "0.0.0.0")
+    port = int(os.getenv("API_PORT", "8888"))
+    
+    logging.info(f"Starting server on {host}:{port}")
+    app.run(host=host, port=port) 

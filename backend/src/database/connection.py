@@ -2,6 +2,11 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from datetime import datetime
 import logging
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class DatabaseConnection:
     """Quản lý kết nối MongoDB"""
@@ -22,8 +27,13 @@ class DatabaseConnection:
     def connect(self):
         """Kết nối đến MongoDB"""
         try:
-            self.client = MongoClient("mongodb+srv://sgra77:AEmlERCYI3IGUZZh@sgra77.o33kyok.mongodb.net/?retryWrites=true&w=majority&appName=sgra77")
+            # Get MongoDB URI from environment variable
+            mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/crypto-lucky")
+            
+            # Connect to MongoDB
+            self.client = MongoClient(mongodb_uri)
             self.db = self.client["crypto-lucky"]
+            
             # Kiểm tra kết nối
             self.client.admin.command('ping')
             logging.info("✓ Kết nối MongoDB thành công! Database: crypto-lucky")

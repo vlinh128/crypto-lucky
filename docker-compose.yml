@@ -8,6 +8,8 @@ services:
       no_cache: true
     ports:
       - "8888:8888"
+    volumes:
+      - ./backend/.env:/app/.env
     networks:
       - app-network
 

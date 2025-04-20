@@ -1,0 +1,61 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.yarn
+.pnp.*
+
+# Build
+build/
+dist/
+out/
+.next/
+.nuxt/
+.cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+log/
+
+# Tests
+coverage/
+.nyc_output/
+jest.config.js
+__tests__/
+*.test.js
+*.spec.js
+
+# Documentation
+README.md
+LICENSE
+docs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Backend files
+backend/ 
